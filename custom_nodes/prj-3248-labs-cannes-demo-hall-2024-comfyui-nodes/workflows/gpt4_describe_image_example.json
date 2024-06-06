@@ -1,0 +1,150 @@
+{
+  "last_node_id": 8,
+  "last_link_id": 7,
+  "nodes": [
+    {
+      "id": 7,
+      "type": "LoadImageWithBase64",
+      "pos": [
+        332,
+        286
+      ],
+      "size": {
+        "0": 315,
+        "1": 334
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null,
+          "shape": 3
+        },
+        {
+          "name": "image_base64",
+          "type": "STRING",
+          "links": [
+            6
+          ],
+          "shape": 3,
+          "slot_index": 1
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImageWithBase64"
+      },
+      "widgets_values": [
+        "433991160_967497368064703_3861216905979609499_n (1).jpg",
+        "image"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "PreviewText",
+      "pos": [
+        1322,
+        308
+      ],
+      "size": {
+        "0": 319,
+        "1": 207
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 7,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewText"
+      },
+      "widgets_values": [
+        "",
+        "thick mustache, round wire-frame glasses"
+      ]
+    },
+    {
+      "id": 8,
+      "type": "GPT4ImageInference",
+      "pos": [
+        772,
+        306
+      ],
+      "size": [
+        392.56198535406133,
+        248.96920176218703
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "base64_image",
+          "type": "STRING",
+          "link": 6,
+          "widget": {
+            "name": "base64_image"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            7
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GPT4ImageInference"
+      },
+      "widgets_values": [
+        "",
+        "gpt-4-vision-preview",
+        0.5,
+        "Describe the facial hair of the person in the photo (if any), as well as any accessories on their head such as glasses or hats (if any). If the person is wearing any accessories, describe the shape or style of the accessory.\n\nYour response should be a comma separated list with the descriptions of facial hair and each accessory separated by a comma. For example:\nfacial hair description, glasses description, hat description.\n\nIf the person in the photo does not have any facial hair or accessories, reply with \"no facial hair\" or \"no accessories\"."
+      ]
+    }
+  ],
+  "links": [
+    [
+      6,
+      7,
+      1,
+      8,
+      0,
+      "STRING"
+    ],
+    [
+      7,
+      8,
+      0,
+      3,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

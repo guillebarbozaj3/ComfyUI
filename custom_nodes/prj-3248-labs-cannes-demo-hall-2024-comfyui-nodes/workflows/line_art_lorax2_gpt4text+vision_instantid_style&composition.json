@@ -1,0 +1,1443 @@
+{
+  "last_node_id": 308,
+  "last_link_id": 577,
+  "nodes": [
+    {
+      "id": 30,
+      "type": "IPAdapterModelLoader",
+      "pos": [
+        -530.2994227855114,
+        1904.1488499747522
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IPADAPTER",
+          "type": "IPADAPTER",
+          "links": [
+            22
+          ],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "IPAdapterModelLoader"
+      },
+      "widgets_values": [
+        "ip-adapter_xl.pth"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "InstantIDModelLoader",
+      "pos": [
+        479.21567397379283,
+        1484.182594200138
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "INSTANTID",
+          "type": "INSTANTID",
+          "links": [
+            3
+          ],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "InstantIDModelLoader"
+      },
+      "widgets_values": [
+        "ip-adapter.bin"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "InstantIDFaceAnalysis",
+      "pos": [
+        483.2156739737929,
+        1584.1825942001378
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "FACEANALYSIS",
+          "type": "FACEANALYSIS",
+          "links": [
+            4
+          ],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "InstantIDFaceAnalysis"
+      },
+      "widgets_values": [
+        "CPU"
+      ]
+    },
+    {
+      "id": 184,
+      "type": "PreviewText",
+      "pos": [
+        -340,
+        1426
+      ],
+      "size": {
+        "0": 315,
+        "1": 76
+      },
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 298,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewText"
+      },
+      "widgets_values": [
+        "",
+        "no facial hair, no accessories,"
+      ]
+    },
+    {
+      "id": 179,
+      "type": "GPT4ImageInference",
+      "pos": [
+        -522,
+        1551
+      ],
+      "size": {
+        "0": 431.2886657714844,
+        "1": 227.6049041748047
+      },
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "base64_image",
+          "type": "STRING",
+          "link": 306,
+          "widget": {
+            "name": "base64_image"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            298,
+            299
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GPT4ImageInference"
+      },
+      "widgets_values": [
+        "",
+        "gpt-4-vision-preview",
+        0.5,
+        "Describe the facial hair of the person in the photo (if any) as well as any accessories in their head such as glasses, hats, earrings etc (if any). \n\nRespond ONLY with a comma separated list, each feature captured must be followed by its description and finish with a comma. \n\nIf the person in the photo doesn't have facial hair or accessories, respond with \"no facial hair, \"no accessories\", "
+      ]
+    },
+    {
+      "id": 15,
+      "type": "VAEDecode",
+      "pos": [
+        1795.5027287592675,
+        1453.7082469456473
+      ],
+      "size": {
+        "0": 210,
+        "1": 46
+      },
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 14
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 394
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            294
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 1,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        -470.53079557784855,
+        -200.2537099968602
+      ],
+      "size": {
+        "0": 315,
+        "1": 98
+      },
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            19
+          ],
+          "shape": 3
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            20
+          ],
+          "shape": 3
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            393
+          ],
+          "shape": 3,
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "sd_xl_base_1.0.safetensors"
+      ]
+    },
+    {
+      "id": 177,
+      "type": "SaveImage",
+      "pos": [
+        2039.7896502270803,
+        1450.1901601399131
+      ],
+      "size": {
+        "0": 538.4732055664062,
+        "1": 541.2218017578125
+      },
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 294
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        "cannes_portrait_to_lineart_base"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "ControlNetLoader",
+      "pos": [
+        478.21567397379283,
+        1688.1825942001378
+      ],
+      "size": {
+        "0": 396.291259765625,
+        "1": 58
+      },
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "CONTROL_NET",
+          "type": "CONTROL_NET",
+          "links": [
+            5
+          ],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ControlNetLoader"
+      },
+      "widgets_values": [
+        "diffusion_pytorch_model.safetensors"
+      ]
+    },
+    {
+      "id": 23,
+      "type": "LoraLoader",
+      "pos": [
+        -495.56633901668107,
+        471.15327955502175
+      ],
+      "size": {
+        "0": 334.6266784667969,
+        "1": 126
+      },
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 19
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            17
+          ],
+          "shape": 3
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            18
+          ],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoraLoader"
+      },
+      "widgets_values": [
+        "continous_line_artXL.safetensors",
+        1,
+        1
+      ]
+    },
+    {
+      "id": 17,
+      "type": "LoraLoader",
+      "pos": [
+        -485.1519110450944,
+        663.499135490352
+      ],
+      "size": {
+        "0": 315,
+        "1": 126
+      },
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 17
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            21
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            1,
+            297
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoraLoader"
+      },
+      "widgets_values": [
+        "Line_Art_SDXL.safetensors",
+        1.05,
+        1.1
+      ]
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [
+        65,
+        1580
+      ],
+      "size": {
+        "0": 288.8658142089844,
+        "1": 108.90074157714844
+      },
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            126
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "title": "Negative Prompt",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "(text:1.2), watermark, painting, shading, lighting, shadows, filling, intricate details, overly complex"
+      ]
+    },
+    {
+      "id": 180,
+      "type": "CLIPCombineText",
+      "pos": [
+        15,
+        1164
+      ],
+      "size": {
+        "0": 400,
+        "1": 200
+      },
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 297
+        },
+        {
+          "name": "text_to_append_1",
+          "type": "STRING",
+          "link": 349,
+          "widget": {
+            "name": "text_to_append_1"
+          }
+        },
+        {
+          "name": "text_to_append_2",
+          "type": "STRING",
+          "link": 299,
+          "widget": {
+            "name": "text_to_append_2"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            563
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            302
+          ],
+          "shape": 3,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPCombineText"
+      },
+      "widgets_values": [
+        "",
+        "ais-lineart, (line art), continuous line drawing, coloring book drawing, freehand drawing of the upper body of a person,\n(hidden surprise), (hidden detail)",
+        ""
+      ]
+    },
+    {
+      "id": 14,
+      "type": "KSampler",
+      "pos": [
+        1430.5027287592704,
+        1457.7082469456473
+      ],
+      "size": {
+        "0": 315,
+        "1": 262
+      },
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 314
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 560
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 12
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 576
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            14
+          ],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        0,
+        "fixed",
+        20,
+        4.2,
+        "ddpm",
+        "karras",
+        1
+      ]
+    },
+    {
+      "id": 29,
+      "type": "CLIPVisionLoader",
+      "pos": [
+        -533.2994227855114,
+        2009.1488499747527
+      ],
+      "size": {
+        "0": 315,
+        "1": 58
+      },
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "CLIP_VISION",
+          "type": "CLIP_VISION",
+          "links": [
+            25
+          ],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPVisionLoader"
+      },
+      "widgets_values": [
+        "clip_vision_g.safetensors"
+      ]
+    },
+    {
+      "id": 181,
+      "type": "PreviewText",
+      "pos": [
+        -428,
+        881
+      ],
+      "size": {
+        "0": 350.8666076660156,
+        "1": 116.53963470458984
+      },
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 301,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewText"
+      },
+      "widgets_values": [
+        "",
+        "(a circuit board pattern subtly integrated into the collar of the shirt)\n\n(a small cloud with 1s and 0s raining down, placed in the top left of the background)"
+      ]
+    },
+    {
+      "id": 183,
+      "type": "PreviewText",
+      "pos": [
+        60,
+        931
+      ],
+      "size": {
+        "0": 336.3832092285156,
+        "1": 184.2098846435547
+      },
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 302,
+          "widget": {
+            "name": "text"
+          }
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewText"
+      },
+      "widgets_values": [
+        "",
+        "ais-lineart, (line art), continuous line drawing, coloring book drawing, freehand drawing of the upper body of a person,\n(hidden surprise), (hidden detail), (a circuit board pattern subtly integrated into the collar of the shirt)\n\n(a small cloud with 1s and 0s raining down, placed in the top left of the background), no facial hair, no accessories,"
+      ]
+    },
+    {
+      "id": 185,
+      "type": "LoadImageWithBase64",
+      "pos": [
+        -523,
+        31
+      ],
+      "size": {
+        "0": 224.31602478027344,
+        "1": 334
+      },
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            309
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "image_base64",
+          "type": "STRING",
+          "links": [
+            306
+          ],
+          "shape": 3,
+          "slot_index": 1
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImageWithBase64"
+      },
+      "widgets_values": [
+        "mark-zuckerberg-headshot.png",
+        "image"
+      ]
+    },
+    {
+      "id": 26,
+      "type": "IPAdapterStyleComposition",
+      "pos": [
+        92,
+        1955
+      ],
+      "size": {
+        "0": 315,
+        "1": 322
+      },
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 21
+        },
+        {
+          "name": "ipadapter",
+          "type": "IPADAPTER",
+          "link": 22
+        },
+        {
+          "name": "image_style",
+          "type": "IMAGE",
+          "link": 572
+        },
+        {
+          "name": "image_composition",
+          "type": "IMAGE",
+          "link": 575
+        },
+        {
+          "name": "image_negative",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "attn_mask",
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "clip_vision",
+          "type": "CLIP_VISION",
+          "link": 25
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            7
+          ],
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "IPAdapterStyleComposition"
+      },
+      "widgets_values": [
+        0.8,
+        0.8,
+        false,
+        "add",
+        0,
+        1,
+        "V only"
+      ]
+    },
+    {
+      "id": 227,
+      "type": "Reroute",
+      "pos": [
+        1278,
+        1491
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": 393
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "VAE",
+          "links": [
+            394
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      }
+    },
+    {
+      "id": 186,
+      "type": "Reroute",
+      "pos": [
+        -175,
+        2327
+      ],
+      "size": [
+        75,
+        26
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "",
+          "type": "*",
+          "link": 309
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "IMAGE",
+          "links": [
+            310,
+            575
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "showOutputText": false,
+        "horizontal": false
+      }
+    },
+    {
+      "id": 7,
+      "type": "ApplyInstantID",
+      "pos": [
+        895,
+        1476
+      ],
+      "size": {
+        "0": 315,
+        "1": 266
+      },
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "instantid",
+          "type": "INSTANTID",
+          "link": 3
+        },
+        {
+          "name": "insightface",
+          "type": "FACEANALYSIS",
+          "link": 4
+        },
+        {
+          "name": "control_net",
+          "type": "CONTROL_NET",
+          "link": 5
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 310
+        },
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 7
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 563
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 126
+        },
+        {
+          "name": "image_kps",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            314
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            560
+          ],
+          "shape": 3,
+          "slot_index": 1
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            12
+          ],
+          "shape": 3,
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ApplyInstantID"
+      },
+      "widgets_values": [
+        0.85,
+        0,
+        1
+      ]
+    },
+    {
+      "id": 13,
+      "type": "EmptyLatentImage",
+      "pos": [
+        -271.99916239438977,
+        217.40569392351614
+      ],
+      "size": {
+        "0": 315,
+        "1": 106
+      },
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            576
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        4
+      ]
+    },
+    {
+      "id": 178,
+      "type": "GPT4TextInference",
+      "pos": [
+        -519,
+        1051
+      ],
+      "size": {
+        "0": 424.5964050292969,
+        "1": 340.7439270019531
+      },
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "generated_text",
+          "type": "STRING",
+          "links": [
+            301,
+            349
+          ],
+          "shape": 3,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GPT4TextInference"
+      },
+      "widgets_values": [
+        "gpt-4-turbo",
+        0.8,
+        "Assist an artist in creating a portrait, choosing simple, iconic elements that tie into a specific theme for integration into the piece.\n\nFor instance, if the theme is gardening, consider a ladybug placed in the background foliage, or if it's architecture, include a sketch of a building.\n\nSelect one or two simple surprises to enhance the line art drawing composition without dominating it. These additions should complement the main subject and align with the chosen theme.\n\nElements must be easy to incorporate into the person's clothing in the upper body, float them in the background (top left or top right), or use them as a decorative ornament or accessory.\n\nEnsure that the artwork keeps its clarity with techniques like:\n\nquick sketch\nline art\nusing a white background\ncontinuous line drawing\ncoloring book style\nfocusing on the upper part of the body\ncrafting a freehand drawing of the person\nintegrating a hidden surprise effectively\n\n\nFollow ONLY this format for your output (...something drawable):\n\n(a leaf pattern in the shirt design)\n\n(a small bird silhouette in the top right of the background)\n\n(sketch of a small building)\n",
+        "\"Building scalable and efficient databases\"\n\"I optimize data storage for large corporations\"\n\"I am a database administrator\""
+      ]
+    },
+    {
+      "id": 31,
+      "type": "LoadImage",
+      "pos": [
+        -527,
+        2131
+      ],
+      "size": {
+        "0": 243.07676696777344,
+        "1": 314.00006103515625
+      },
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            572
+          ],
+          "shape": 3,
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "shape": 3
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "style.png",
+        "image"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      17,
+      1,
+      5,
+      0,
+      "CLIP"
+    ],
+    [
+      3,
+      3,
+      0,
+      7,
+      0,
+      "INSTANTID"
+    ],
+    [
+      4,
+      4,
+      0,
+      7,
+      1,
+      "FACEANALYSIS"
+    ],
+    [
+      5,
+      9,
+      0,
+      7,
+      2,
+      "CONTROL_NET"
+    ],
+    [
+      7,
+      26,
+      0,
+      7,
+      4,
+      "MODEL"
+    ],
+    [
+      12,
+      7,
+      2,
+      14,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      14,
+      14,
+      0,
+      15,
+      0,
+      "LATENT"
+    ],
+    [
+      17,
+      23,
+      0,
+      17,
+      0,
+      "MODEL"
+    ],
+    [
+      18,
+      23,
+      1,
+      17,
+      1,
+      "CLIP"
+    ],
+    [
+      19,
+      1,
+      0,
+      23,
+      0,
+      "MODEL"
+    ],
+    [
+      20,
+      1,
+      1,
+      23,
+      1,
+      "CLIP"
+    ],
+    [
+      21,
+      17,
+      0,
+      26,
+      0,
+      "MODEL"
+    ],
+    [
+      22,
+      30,
+      0,
+      26,
+      1,
+      "IPADAPTER"
+    ],
+    [
+      25,
+      29,
+      0,
+      26,
+      6,
+      "CLIP_VISION"
+    ],
+    [
+      126,
+      5,
+      0,
+      7,
+      6,
+      "CONDITIONING"
+    ],
+    [
+      294,
+      15,
+      0,
+      177,
+      0,
+      "IMAGE"
+    ],
+    [
+      297,
+      17,
+      1,
+      180,
+      0,
+      "CLIP"
+    ],
+    [
+      298,
+      179,
+      0,
+      184,
+      0,
+      "STRING"
+    ],
+    [
+      299,
+      179,
+      0,
+      180,
+      2,
+      "STRING"
+    ],
+    [
+      301,
+      178,
+      0,
+      181,
+      0,
+      "STRING"
+    ],
+    [
+      302,
+      180,
+      1,
+      183,
+      0,
+      "STRING"
+    ],
+    [
+      306,
+      185,
+      1,
+      179,
+      0,
+      "STRING"
+    ],
+    [
+      309,
+      185,
+      0,
+      186,
+      0,
+      "*"
+    ],
+    [
+      310,
+      186,
+      0,
+      7,
+      3,
+      "IMAGE"
+    ],
+    [
+      314,
+      7,
+      0,
+      14,
+      0,
+      "MODEL"
+    ],
+    [
+      349,
+      178,
+      0,
+      180,
+      1,
+      "STRING"
+    ],
+    [
+      393,
+      1,
+      2,
+      227,
+      0,
+      "*"
+    ],
+    [
+      394,
+      227,
+      0,
+      15,
+      1,
+      "VAE"
+    ],
+    [
+      560,
+      7,
+      1,
+      14,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      563,
+      180,
+      0,
+      7,
+      5,
+      "CONDITIONING"
+    ],
+    [
+      572,
+      31,
+      0,
+      26,
+      2,
+      "IMAGE"
+    ],
+    [
+      575,
+      186,
+      0,
+      26,
+      3,
+      "IMAGE"
+    ],
+    [
+      576,
+      13,
+      0,
+      14,
+      3,
+      "LATENT"
+    ]
+  ],
+  "groups": [
+    {
+      "title": "IPAdapter Style & Composition SDXL",
+      "bounding": [
+        -550,
+        1822,
+        1053,
+        664
+      ],
+      "color": "#3f789e",
+      "font_size": 24
+    },
+    {
+      "title": "Apply InstantID",
+      "bounding": [
+        457,
+        1391,
+        781,
+        403
+      ],
+      "color": "#b58b2a",
+      "font_size": 24
+    },
+    {
+      "title": "LoRa Models",
+      "bounding": [
+        -544,
+        389,
+        456,
+        421
+      ],
+      "color": "#8A8",
+      "font_size": 24
+    },
+    {
+      "title": "Source Image",
+      "bounding": [
+        -544,
+        -49,
+        618,
+        424
+      ],
+      "color": "#A88",
+      "font_size": 24
+    },
+    {
+      "title": "GPT Processing",
+      "bounding": [
+        -545,
+        841,
+        976,
+        960
+      ],
+      "color": "#8AA",
+      "font_size": 24
+    },
+    {
+      "title": "Model Checkpoint",
+      "bounding": [
+        -542,
+        -288,
+        480,
+        211
+      ],
+      "color": "#3f789e",
+      "font_size": 24
+    },
+    {
+      "title": "Group",
+      "bounding": [
+        1404,
+        1352,
+        1207,
+        669
+      ],
+      "color": "#8A8",
+      "font_size": 24
+    }
+  ],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

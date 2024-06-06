@@ -1,0 +1,591 @@
+{
+  "1": {
+    "inputs": {
+      "ckpt_name": "sd_xl_base_1.0.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "3": {
+    "inputs": {
+      "instantid_file": "ip-adapter.bin"
+    },
+    "class_type": "InstantIDModelLoader",
+    "_meta": {
+      "title": "Load InstantID Model"
+    }
+  },
+  "4": {
+    "inputs": {
+      "provider": "CPU"
+    },
+    "class_type": "InstantIDFaceAnalysis",
+    "_meta": {
+      "title": "InstantID Face Analysis"
+    }
+  },
+  "7": {
+    "inputs": {
+      "weight": 0.75,
+      "start_at": 0,
+      "end_at": 1,
+      "instantid": [
+        "3",
+        0
+      ],
+      "insightface": [
+        "4",
+        0
+      ],
+      "control_net": [
+        "9",
+        0
+      ],
+      "image": [
+        "185",
+        0
+      ],
+      "model": [
+        "782",
+        0
+      ],
+      "positive": [
+        "737",
+        0
+      ],
+      "negative": [
+        "737",
+        1
+      ]
+    },
+    "class_type": "ApplyInstantID",
+    "_meta": {
+      "title": "Apply InstantID"
+    }
+  },
+  "9": {
+    "inputs": {
+      "control_net_name": "diffusion_pytorch_model.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "17": {
+    "inputs": {
+      "lora_name": "LoRa_The_Line_SDXL1.safetensors",
+      "strength_model": 0.5,
+      "strength_clip": 0.5,
+      "model": [
+        "786",
+        0
+      ],
+      "clip": [
+        "786",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "178": {
+    "inputs": {
+      "model_name": "gpt-4-turbo",
+      "temperature": 0.5,
+      "instructions": "Choose a specific theme for your portrait, such as gardening, architecture, sea life, or astronomy. This theme will guide the selection of a single iconic element to be incorporated into a black and white line art drawing. \n\nThink about a word to use as subject, must be related to the theme like a neuroscientist, a gardener, a surfer, a football player, a robot, a pilot, a fisher, a fashion designer, a politician and such, please choose a subject that matches with the person's interest.\n\nThink about the relation between the subject and the element, is the subject holding the element, with his hands? Is it on his head? How is the element related to the subject and the pose? Can it fit in a close up shot? How is the subject holding the element? Is the subject wearing something? Add wording to correctly position the element on the subject. What's on the background?\n\nThink about the composition, we want to see the subject's face always, so the element must never cover the person's face. Don't suggest items that can cover up the face such as masks, camera to the face, or any object covering his face.\n\nYou must choose one element that fits for the subject and one for the background scene.\n\nOutput can't exceed 10 words and cannot be vague.\n\nOutput must be under 10 words.\n\nYou must address the subject by its alias.",
+      "prompt": "\"Expressing emotions through dance is my passion.\"\n\"I specialize in various dance styles, from ballet to hip-hop.\"\n\"I am dedicated to perfecting my artistry through movement.\""
+    },
+    "class_type": "GPT4TextInference",
+    "_meta": {
+      "title": "GPT4TextInference"
+    }
+  },
+  "179": {
+    "inputs": {
+      "base64_image": [
+        "185",
+        1
+      ],
+      "model_name": "gpt-4-vision-preview",
+      "temperature": 0.8,
+      "prompt": "Describe the facial hair of the person in the photo (if any) as well as any accessories in their head such as glasses, hats, earrings etc (if any). \n\nRespond on this format: \"[description of facial hair], [description of accessories], [other description]\" \n\nYou can respond even if there is nothing to respond just saying \"no facial hair, no earrings\"\n\nsome varied examples:\n\nstubble, round glasses.\n\nno beard, hoop earrings.\n\nno piercings, no facial hair.\n\nfurr hat, no facial hair.\n\nblack frame glasses, earrings.\n\nshaved look, no earrings, no necklace."
+    },
+    "class_type": "GPT4ImageInference",
+    "_meta": {
+      "title": "GPT4ImageInference"
+    }
+  },
+  "180": {
+    "inputs": {
+      "text_to_append_1": [
+        "179",
+        0
+      ],
+      "text": "line art style, continuous line art drawing",
+      "text_to_append_2": [
+        "178",
+        0
+      ],
+      "clip": [
+        "17",
+        1
+      ]
+    },
+    "class_type": "CLIPCombineText",
+    "_meta": {
+      "title": "CLIPCombineText"
+    }
+  },
+  "181": {
+    "inputs": {
+      "text": [
+        "178",
+        0
+      ]
+    },
+    "class_type": "PreviewText",
+    "_meta": {
+      "title": "PreviewText"
+    }
+  },
+  "183": {
+    "inputs": {
+      "text": [
+        "180",
+        1
+      ]
+    },
+    "class_type": "PreviewText",
+    "_meta": {
+      "title": "PreviewText"
+    }
+  },
+  "184": {
+    "inputs": {
+      "text": [
+        "179",
+        0
+      ]
+    },
+    "class_type": "PreviewText",
+    "_meta": {
+      "title": "PreviewText"
+    }
+  },
+  "185": {
+    "inputs": {
+      "image": "WIN_20240429_11_50_59_Pro.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImageWithBase64",
+    "_meta": {
+      "title": "LoadImageWithBase64"
+    }
+  },
+  "309": {
+    "inputs": {
+      "unet_name": "lcm-sdxl.safetensors"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNETLoader"
+    }
+  },
+  "612": {
+    "inputs": {
+      "seed": 118965840393644,
+      "steps": 8,
+      "cfg": 1.5,
+      "sampler_name": "lcm",
+      "scheduler": "karras",
+      "denoise": 0.9,
+      "model": [
+        "652",
+        0
+      ],
+      "positive": [
+        "7",
+        1
+      ],
+      "negative": [
+        "7",
+        2
+      ],
+      "latent_image": [
+        "779",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "613": {
+    "inputs": {
+      "samples": [
+        "612",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "614": {
+    "inputs": {
+      "filename_prefix": "base_portrait",
+      "images": [
+        "613",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "618": {
+    "inputs": {
+      "text": "text, (watermark), fillings, shadow, deformed, ugly, mutilated, disfigured, extra limbs, face cut, head cut, extra fingers, extra arms, poorly drawn face, mutation, bad proportions, cropped head, malformed limbs, mutated hands, fused fingers, long neck, nude, naked,",
+      "clip": [
+        "17",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "652": {
+    "inputs": {
+      "sampling": "lcm",
+      "zsnr": false,
+      "model": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingDiscrete",
+    "_meta": {
+      "title": "ModelSamplingDiscrete"
+    }
+  },
+  "710": {
+    "inputs": {
+      "seed": 0,
+      "steps": 6,
+      "cfg": 1.3,
+      "sampler_name": "lcm",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "739",
+        0
+      ],
+      "positive": [
+        "755",
+        0
+      ],
+      "negative": [
+        "758",
+        0
+      ],
+      "latent_image": [
+        "732",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "711": {
+    "inputs": {
+      "samples": [
+        "710",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "719": {
+    "inputs": {
+      "lora_name": "xl_more_art-full_v1.safetensors",
+      "strength_model": 1,
+      "strength_clip": 1,
+      "model": [
+        "309",
+        0
+      ],
+      "clip": [
+        "1",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "732": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "737": {
+    "inputs": {
+      "strength": 0.8,
+      "start_percent": 0,
+      "end_percent": 1,
+      "positive": [
+        "788",
+        0
+      ],
+      "negative": [
+        "618",
+        0
+      ],
+      "control_net": [
+        "738",
+        0
+      ],
+      "image": [
+        "777",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Apply ControlNet (Advanced)"
+    }
+  },
+  "738": {
+    "inputs": {
+      "control_net_name": "control-lora-sketch-rank256.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "739": {
+    "inputs": {
+      "sampling": "lcm",
+      "zsnr": false,
+      "model": [
+        "719",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingDiscrete",
+    "_meta": {
+      "title": "ModelSamplingDiscrete"
+    }
+  },
+  "753": {
+    "inputs": {
+      "images": [
+        "789",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "755": {
+    "inputs": {
+      "text_to_append_1": [
+        "178",
+        0
+      ],
+      "text": "A photography, medium shot, dramatic lighting, high resolution, high detailed, 4k, high definition, epic composition, mid shot, medium shot, full body shot",
+      "clip": [
+        "719",
+        1
+      ]
+    },
+    "class_type": "CLIPCombineText",
+    "_meta": {
+      "title": "CLIPCombineText"
+    }
+  },
+  "758": {
+    "inputs": {
+      "text": "text, watermark, deformed, ugly, mutilated, disfigured, text, extra limbs, face cut, head cut, extra fingers, extra arms, poorly drawn face, mutation, bad proportions, cropped head, malformed limbs, mutated hands, fused fingers, long neck, nude, naked, illustration, painting, drawing, art, sketch, no limbs, incomplete limbs",
+      "clip": [
+        "719",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "777": {
+    "inputs": {
+      "image": [
+        "789",
+        0
+      ]
+    },
+    "class_type": "ImageInvert",
+    "_meta": {
+      "title": "Invert Image"
+    }
+  },
+  "779": {
+    "inputs": {
+      "pixels": [
+        "777",
+        0
+      ],
+      "vae": [
+        "1",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "781": {
+    "inputs": {
+      "ipadapter_file": "ip-adapter_xl.pth"
+    },
+    "class_type": "IPAdapterModelLoader",
+    "_meta": {
+      "title": "IPAdapter Model Loader"
+    }
+  },
+  "782": {
+    "inputs": {
+      "weight": 0.8,
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 1,
+      "embeds_scaling": "V only",
+      "model": [
+        "17",
+        0
+      ],
+      "ipadapter": [
+        "781",
+        0
+      ],
+      "image": [
+        "777",
+        0
+      ],
+      "clip_vision": [
+        "783",
+        0
+      ]
+    },
+    "class_type": "IPAdapterAdvanced",
+    "_meta": {
+      "title": "IPAdapter Advanced"
+    }
+  },
+  "783": {
+    "inputs": {
+      "clip_name": "clip_vision_g.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
+    }
+  },
+  "786": {
+    "inputs": {
+      "lora_name": "LoRa_Line_Art_SDXL.safetensors",
+      "strength_model": 0.2,
+      "strength_clip": 0.4,
+      "model": [
+        "719",
+        0
+      ],
+      "clip": [
+        "719",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "788": {
+    "inputs": {
+      "text_to_append_1": [
+        "178",
+        0
+      ],
+      "text": "line art style, continuous line art drawing",
+      "clip": [
+        "17",
+        1
+      ]
+    },
+    "class_type": "CLIPCombineText",
+    "_meta": {
+      "title": "CLIPCombineText"
+    }
+  },
+  "789": {
+    "inputs": {
+      "low_threshold": 0.05,
+      "high_threshold": 0.2,
+      "image": [
+        "711",
+        0
+      ]
+    },
+    "class_type": "Canny",
+    "_meta": {
+      "title": "Canny"
+    }
+  },
+  "791": {
+    "inputs": {
+      "images": [
+        "711",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  }
+}
