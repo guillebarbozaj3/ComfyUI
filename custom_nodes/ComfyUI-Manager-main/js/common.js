@@ -1,11 +1,6 @@
 import { app } from "../../scripts/app.js";
 import { api } from "../../scripts/api.js";
 
-export function show_message(msg) {
-	app.ui.dialog.show(msg);
-	app.ui.dialog.element.style.zIndex = 10010;
-}
-
 export async function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -52,20 +47,6 @@ export async function install_checked_custom_node(grid_rows, target_i, caller, m
 														body: JSON.stringify(target)
 													});
 
-				if(response.status == 403) {
-					show_message('This action is not allowed with this security level configuration.');
-					caller.updateMessage('');
-					await caller.invalidateControl();
-					return;
-				}
-
-				if(response.status == 404) {
-					show_message('With the current security level configuration, only custom nodes from the <B>"default channel"</B> can be installed.');
-					caller.updateMessage('');
-					await caller.invalidateControl();
-					return;
-				}
-
 				if(response.status == 400) {
 					show_message(`${mode} failed: ${target.title}`);
 					continue;
@@ -108,26 +89,21 @@ export async function install_pip(packages) {
 	if(packages.includes('&'))
 		app.ui.dialog.show(`Invalid PIP package enumeration: '${packages}'`);
 
-	const res = await api.fetchApi("/customnode/install/pip", {
-		method: "POST",
-		body: packages,
-	});
-
-	if(res.status == 403) {
-		show_message('This action is not allowed with this security level configuration.');
-		return;
-	}
+	const res = await api.fetchApi(`/customnode/install/pip?packages=${packages}`);
 
 	if(res.status == 200) {
-		show_message(`PIP package installation is processed.<br>To apply the pip packages, please click the <button id='cm-reboot-button3'><font size='3px'>RESTART</font></button> button in ComfyUI.`);
+		app.ui.dialog.show(`PIP package installation is processed.<br>To apply the pip packages, please click the <button id='cm-reboot-button3'><font size='3px'>RESTART</font></button> button in ComfyUI.`);
 
 		const rebootButton = document.getElementById('cm-reboot-button3');
 		const self = this;
 
 		rebootButton.addEventListener("click", rebootAPI);
+
+		app.ui.dialog.element.style.zIndex = 10010;
 	}
 	else {
-		show_message(`Failed to install '${packages}'<BR>See terminal log.`);
+		app.ui.dialog.show(`Failed to install '${packages}'<BR>See terminal log.`);
+		app.ui.dialog.element.style.zIndex = 10010;
 	}
 }
 
@@ -137,24 +113,18 @@ export async function install_via_git_url(url, manager_dialog) {
 	}
 
 	if(!isValidURL(url)) {
-		show_message(`Invalid Git url '${url}'`);
+		app.ui.dialog.show(`Invalid Git url '${url}'`);
+		app.ui.dialog.element.style.zIndex = 10010;
 		return;
 	}
 
-	show_message(`Wait...<BR><BR>Installing '${url}'`);
+	app.ui.dialog.show(`Wait...<BR><BR>Installing '${url}'`);
+	app.ui.dialog.element.style.zIndex = 10010;
 
-	const res = await api.fetchApi("/customnode/install/git_url", {
-		method: "POST",
-		body: url,
-	});
-
-	if(res.status == 403) {
-		show_message('This action is not allowed with this security level configuration.');
-		return;
-	}
+	const res = await api.fetchApi(`/customnode/install/git_url?url=${url}`);
 
 	if(res.status == 200) {
-		show_message(`'${url}' is installed<BR>To apply the installed custom node, please <button id='cm-reboot-button4'><font size='3px'>RESTART</font></button> ComfyUI.`);
+		app.ui.dialog.show(`'${url}' is installed<BR>To apply the installed custom node, please <button id='cm-reboot-button4'><font size='3px'>RESTART</font></button> ComfyUI.`);
 
 		const rebootButton = document.getElementById('cm-reboot-button4');
 		const self = this;
@@ -165,9 +135,12 @@ export async function install_via_git_url(url, manager_dialog) {
 					manager_dialog.close();
 				}
 			});
+
+		app.ui.dialog.element.style.zIndex = 10010;
 	}
 	else {
-		show_message(`Failed to install '${url}'<BR>See terminal log.`);
+		app.ui.dialog.show(`Failed to install '${url}'<BR>See terminal log.`);
+		app.ui.dialog.element.style.zIndex = 10010;
 	}
 }
 
@@ -175,13 +148,19 @@ export async function free_models() {
 	let res = await api.fetchApi(`/free`, {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
-						body: '{"unload_models": true}'
+						body: '{}'
 					});
 
 	if(res.status == 200) {
-		show_message('Models have been unloaded.')
+		app.ui.dialog.show('Models have been unloaded.')
 	}
 	else {
-		show_message('Unloading of models failed.<BR><BR>Installed ComfyUI may be an outdated version.')
+		app.ui.dialog.show('Unloading of models failed.<BR><BR>Installed ComfyUI may be an outdated version.')
 	}
+	app.ui.dialog.element.style.zIndex = 10010;
+}
+
+export function show_message(msg) {
+	app.ui.dialog.show(msg);
+	app.ui.dialog.element.style.zIndex = 10010;
 }

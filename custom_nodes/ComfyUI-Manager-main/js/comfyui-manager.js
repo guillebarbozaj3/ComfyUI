@@ -15,7 +15,7 @@ import { CustomNodesInstaller } from "./custom-nodes-downloader.js";
 import { AlternativesInstaller } from "./a1111-alter-downloader.js";
 import { SnapshotManager } from "./snapshot.js";
 import { ModelInstaller } from "./model-downloader.js";
-import { manager_instance, setManagerInstance, install_via_git_url, install_pip, rebootAPI, free_models, show_message } from "./common.js";
+import { manager_instance, setManagerInstance, install_via_git_url, install_pip, rebootAPI, free_models } from "./common.js";
 import { ComponentBuilderDialog, load_components, set_component_policy, getPureName } from "./components-manager.js";
 import { set_double_click_policy } from "./node_fixer.js";
 
@@ -224,16 +224,6 @@ const style = `
 	position: relative;
 	overflow: hidden;
 	font-size: 17px !important;
-}
-
-.cm-button-red {
-	width: 310px;
-	height: 30px;
-	position: relative;
-	overflow: hidden;
-	font-size: 17px !important;
-	background-color: #500000 !important;
-	color: white !important;
 }
 
 .cm-experimental-button {
@@ -520,21 +510,25 @@ async function updateComfyUI() {
 		const response = await api.fetchApi('/comfyui_manager/update_comfyui');
 
 		if (response.status == 400) {
-			show_message('Failed to update ComfyUI.');
+			app.ui.dialog.show('Failed to update ComfyUI.');
+			app.ui.dialog.element.style.zIndex = 10010;
 			return false;
 		}
 
 		if (response.status == 201) {
-			show_message('ComfyUI has been successfully updated.');
+			app.ui.dialog.show('ComfyUI has been successfully updated.');
+			app.ui.dialog.element.style.zIndex = 10010;
 		}
 		else {
-			show_message('ComfyUI is already up to date with the latest version.');
+			app.ui.dialog.show('ComfyUI is already up to date with the latest version.');
+			app.ui.dialog.element.style.zIndex = 10010;
 		}
 
 		return true;
 	}
 	catch (exception) {
-		show_message(`Failed to update ComfyUI / ${exception}`);
+		app.ui.dialog.show(`Failed to update ComfyUI / ${exception}`);
+		app.ui.dialog.element.style.zIndex = 10010;
 		return false;
 	}
 	finally {
@@ -556,12 +550,13 @@ async function fetchUpdates(update_check_checkbox) {
 		const response = await api.fetchApi(`/customnode/fetch_updates?mode=${mode}`);
 
 		if (response.status != 200 && response.status != 201) {
-			show_message('Failed to fetch updates.');
+			app.ui.dialog.show('Failed to fetch updates.');
+			app.ui.dialog.element.style.zIndex = 10010;
 			return false;
 		}
 
 		if (response.status == 201) {
-			show_message("There is an updated extension available.<BR><BR><P><B>NOTE:<BR>Fetch Updates is not an update.<BR>Please update from <button id='cm-install-customnodes-button'>Install Custom Nodes</button> </B></P>");
+			app.ui.dialog.show("There is an updated extension available.<BR><BR><P><B>NOTE:<BR>Fetch Updates is not an update.<BR>Please update from <button id='cm-install-customnodes-button'>Install Custom Nodes</button> </B></P>");
 
 			const button = document.getElementById('cm-install-customnodes-button');
 			button.addEventListener("click",
@@ -575,16 +570,19 @@ async function fetchUpdates(update_check_checkbox) {
 				}
 			);
 
+			app.ui.dialog.element.style.zIndex = 10010;
 			update_check_checkbox.checked = false;
 		}
 		else {
-			show_message('All extensions are already up-to-date with the latest versions.');
+			app.ui.dialog.show('All extensions are already up-to-date with the latest versions.');
+			app.ui.dialog.element.style.zIndex = 10010;
 		}
 
 		return true;
 	}
 	catch (exception) {
-		show_message(`Failed to update custom nodes / ${exception}`);
+		app.ui.dialog.show(`Failed to update custom nodes / ${exception}`);
+		app.ui.dialog.element.style.zIndex = 10010;
 		return false;
 	}
 	finally {
@@ -607,16 +605,11 @@ async function updateAll(update_check_checkbox, manager_dialog) {
 		const response1 = await api.fetchApi('/comfyui_manager/update_comfyui');
 		const response2 = await api.fetchApi(`/customnode/update_all?mode=${mode}`);
 
-		if (response2.status == 403) {
-			show_message('This action is not allowed with this security level configuration.');
+		if (response1.status != 200 && response2.status != 201) {
+			app.ui.dialog.show('Failed to update ComfyUI or several extensions.<BR><BR>See terminal log.<BR>');
+			app.ui.dialog.element.style.zIndex = 10010;
 			return false;
 		}
-
-		if (response1.status == 400 || response2.status == 400) {
-			show_message('Failed to update ComfyUI or several extensions.<BR><BR>See terminal log.<BR>');
-			return false;
-		}
-
 		if(response1.status == 201 || response2.status == 201) {
 			const update_info = await response2.json();
 
@@ -630,7 +623,7 @@ async function updateAll(update_check_checkbox, manager_dialog) {
 				updated_list = "<BR>UPDATED: "+update_info.updated.join(", ");
 			}
 
-			show_message(
+			app.ui.dialog.show(
 				"ComfyUI and all extensions have been updated to the latest version.<BR>To apply the updated custom node, please <button class='cm-small-button' id='cm-reboot-button5'>RESTART</button> ComfyUI. And refresh browser.<BR>"
 				+failed_list
 				+updated_list
@@ -643,15 +636,19 @@ async function updateAll(update_check_checkbox, manager_dialog) {
 						manager_dialog.close();
 					}
 				});
+
+			app.ui.dialog.element.style.zIndex = 10010;
 		}
 		else {
-			show_message('ComfyUI and all extensions are already up-to-date with the latest versions.');
+			app.ui.dialog.show('ComfyUI and all extensions are already up-to-date with the latest versions.');
+			app.ui.dialog.element.style.zIndex = 10010;
 		}
 
 		return true;
 	}
 	catch (exception) {
-		show_message(`Failed to update ComfyUI or several extensions / ${exception}`);
+		app.ui.dialog.show(`Failed to update ComfyUI or several extensions / ${exception}`);
+		app.ui.dialog.element.style.zIndex = 10010;
 		return false;
 	}
 	finally {
@@ -772,14 +769,7 @@ class ManagerMenuDialog extends ComfyDialog {
 								AlternativesInstaller.instance = new AlternativesInstaller(app, self);
 							AlternativesInstaller.instance.show();
 						}
-				}),
-
-				$el("br", {}, []),
-				$el("button.cm-button-red", {
-					type: "button",
-					textContent: "Restart",
-					onclick: () => rebootAPI()
-				}),
+				})
 			];
 
 		return res;
@@ -918,7 +908,7 @@ class ManagerMenuDialog extends ComfyDialog {
 		});
 
 		let dbl_click_policy_combo = document.createElement("select");
-		dbl_click_policy_combo.setAttribute("title", "Sets the behavior when you double-click the title area of a node.");
+		dbl_click_policy_combo.setAttribute("title", "When loading the workflow, configure which version of the component to use.");
 		dbl_click_policy_combo.className = "cm-menu-combo";
 		dbl_click_policy_combo.appendChild($el('option', { value: 'none', text: 'Double-Click: None' }, []));
 		dbl_click_policy_combo.appendChild($el('option', { value: 'copy-all', text: 'Double-Click: Copy All Connections' }, []));

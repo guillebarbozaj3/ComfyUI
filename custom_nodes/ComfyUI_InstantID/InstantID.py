@@ -9,7 +9,6 @@ import PIL.Image
 from .resampler import Resampler
 from .CrossAttentionPatch import CrossAttentionPatch
 from .utils import tensor_to_image
-from main import final_port
 import requests
 
 from insightface.app import FaceAnalysis
@@ -199,7 +198,6 @@ class InstantIDModelLoader:
 def extractFeatures(insightface, image, extract_kps=False):
     face_img = tensor_to_image(image)
     out = []
-    only_one_face = True
 
     insightface.det_model.input_size = (640, 640)  # reset the detection size
 
@@ -230,13 +228,7 @@ def extractFeatures(insightface, image, extract_kps=False):
                     )
                 break
             else:
-                only_one_face = False
                 print("No faces detected.")
-
-    if not only_one_face:
-        print("no faces or many faces")
-        requests.post(f"http://localhost:{final_port}/interrupt")
-        return None
 
     if out:
         if extract_kps:

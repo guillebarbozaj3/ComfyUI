@@ -1,0 +1,51 @@
+{
+    "comfyui": "45ec1cbe963055798765645c4f727122a7d3e35e",
+    "git_custom_nodes": {
+        "https://github.com/cubiq/ComfyUI_FaceAnalysis": {
+            "hash": "2aae576a3b48e3d96dc82fcd74704d81793bb0dc",
+            "disabled": false
+        },
+        "https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet": {
+            "hash": "33d9884b76e8d7a2024691c5d98308e7e61bf38d",
+            "disabled": false
+        },
+        "https://github.com/kijai/ComfyUI-KJNodes": {
+            "hash": "02baeb5248e1b6c4c20e6adcd7de562bb4c21d2c",
+            "disabled": false
+        },
+        "https://github.com/Fannovel16/comfyui_controlnet_aux": {
+            "hash": "c0b33402d9cfdc01c4e0984c26e5aadfae948e05",
+            "disabled": false
+        },
+        "https://github.com/Kosinkadink/ComfyUI-AnimateDiff-Evolved": {
+            "hash": "f9e0343f4c4606ee6365a9af4a7e16118f1c45e1",
+            "disabled": false
+        },
+        "https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite": {
+            "hash": "47c7f9a78eeabcf46d953d0c990821f053dd0113",
+            "disabled": false
+        },
+        "https://github.com/Fannovel16/ComfyUI-Frame-Interpolation": {
+            "hash": "5e11679995c68f33891c306a393915feefe234b5",
+            "disabled": false
+        },
+        "https://github.com/cubiq/ComfyUI_InstantID": {
+            "hash": "e9cc7597b2a7cd441065418a975a2de4aa2450df",
+            "disabled": false
+        },
+        "https://github.com/cubiq/ComfyUI_essentials": {
+            "hash": "78fa0fdc397760a1e4239d43011015d17f70291e",
+            "disabled": false
+        },
+        "https://github.com/cubiq/ComfyUI_IPAdapter_plus": {
+            "hash": "f217b03928599488fbb5d8da7aac9f4bca4d034e",
+            "disabled": false
+        }
+    },
+    "file_custom_nodes": [
+        {
+            "filename": "websocket_image_save.py",
+            "disabled": false
+        }
+    ]
+}

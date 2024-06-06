@@ -7,13 +7,11 @@ import threading
 import re
 import locale
 import platform
-import json
 
 
 glob_path = os.path.join(os.path.dirname(__file__), "glob")
 sys.path.append(glob_path)
 
-from manager_util import *
 import cm_global
 
 
@@ -69,23 +67,6 @@ custom_nodes_path = os.path.abspath(os.path.join(comfyui_manager_path, ".."))
 startup_script_path = os.path.join(comfyui_manager_path, "startup-scripts")
 restore_snapshot_path = os.path.join(startup_script_path, "restore-snapshot.json")
 git_script_path = os.path.join(comfyui_manager_path, "git_helper.py")
-pip_overrides_path = os.path.join(comfyui_manager_path, "pip_overrides.json")
-
-
-cm_global.pip_overrides = {}
-if os.path.exists(pip_overrides_path):
-    with open(pip_overrides_path, 'r', encoding="UTF-8", errors="ignore") as json_file:
-        cm_global.pip_overrides = json.load(json_file)
-
-
-def remap_pip_package(pkg):
-    if pkg in cm_global.pip_overrides:
-        res = cm_global.pip_overrides[pkg]
-        print(f"[ComfyUI-Manager] '{pkg}' is remapped to '{res}'")
-        return res
-    else:
-        return pkg
-
 
 std_log_lock = threading.Lock()
 
@@ -300,30 +281,6 @@ except Exception as e:
     print(f"[ComfyUI-Manager] Logging failed: {e}")
 
 
-try:
-    import git
-except ModuleNotFoundError:
-    my_path = os.path.dirname(__file__)
-    requirements_path = os.path.join(my_path, "requirements.txt")
-
-    print(f"## ComfyUI-Manager: installing dependencies. (GitPython)")
-    try:
-        result = subprocess.check_output([sys.executable, '-s', '-m', 'pip', 'install', '-r', requirements_path])
-    except subprocess.CalledProcessError as e:
-        print(f"## [ERROR] ComfyUI-Manager: Attempting to reinstall dependencies using an alternative method.")
-        try:
-            result = subprocess.check_output([sys.executable, '-s', '-m', 'pip', 'install', '--user', '-r', requirements_path])
-        except subprocess.CalledProcessError as e:
-            print(f"## [ERROR] ComfyUI-Manager: Failed to install the GitPython package in the correct Python environment. Please install it manually in the appropriate environment. (You can seek help at https://app.element.io/#/room/%23comfyui_space%3Amatrix.org)")
-
-try:
-    import git
-    print(f"## ComfyUI-Manager: installing dependencies done.")
-except:
-    # maybe we should sys.exit() here? there is at least two screens worth of error messages still being pumped after our error messages
-    print(f"## [ERROR] ComfyUI-Manager: GitPython package seems to be installed, but failed to load somehow. Make sure you have a working git client installed")
-
-
 print("** ComfyUI startup time:", datetime.datetime.now())
 print("** Platform:", platform.system())
 print("** Python version:", sys.version)
@@ -333,26 +290,6 @@ if enable_file_logging:
     print("** Log path:", os.path.abspath('comfyui.log'))
 else:
     print("** Log path: file logging is disabled")
-
-
-def read_downgrade_blacklist():
-    try:
-        import configparser
-        config_path = os.path.join(os.path.dirname(__file__), "config.ini")
-        config = configparser.ConfigParser()
-        config.read(config_path)
-        default_conf = config['default']
-
-        if 'downgrade_blacklist' in default_conf:
-            items = default_conf['downgrade_blacklist'].split(',')
-            items = [x.strip() for x in items if x != '']
-            cm_global.pip_downgrade_blacklist += items
-            cm_global.pip_downgrade_blacklist = list(set(cm_global.pip_downgrade_blacklist))
-    except:
-        pass
-
-
-read_downgrade_blacklist()
 
 
 def check_bypass_ssl():
@@ -377,30 +314,21 @@ check_bypass_ssl()
 # Perform install
 processed_install = set()
 script_list_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "startup-scripts", "install-scripts.txt")
-pip_map = None
+pip_list = None
 
 
 def get_installed_packages():
-    global pip_map
+    global pip_list
 
-    if pip_map is None:
+    if pip_list is None:
         try:
             result = subprocess.check_output([sys.executable, '-m', 'pip', 'list'], universal_newlines=True)
-
-            pip_map = {}
-            for line in result.split('\n'):
-                x = line.strip()
-                if x:
-                    y = line.split()
-                    if y[0] == 'Package' or y[0].startswith('-'):
-                        continue
-
-                    pip_map[y[0]] = y[1]
+            pip_list = set([line.split()[0].lower() for line in result.split('\n') if line.strip()])
         except subprocess.CalledProcessError as e:
             print(f"[ComfyUI-Manager] Failed to retrieve the information of installed pip packages.")
             return set()
-
-    return pip_map
+    
+    return pip_list
 
 
 def is_installed(name):
@@ -409,29 +337,24 @@ def is_installed(name):
     if name.startswith('#'):
         return True
 
-    pattern = r'([^<>!=]+)([<>!=]=?)(.*)'
+    pattern = r'([^<>!=]+)([<>!=]=?)'
     match = re.search(pattern, name)
-
+    
     if match:
         name = match.group(1)
 
     if name in cm_global.pip_downgrade_blacklist:
-        pips = get_installed_packages()
-
-        if match is None:
-            if name in pips:
-                return True
-        elif match.group(2) in ['<=', '==', '<']:
-            if name in pips:
-                if StrictVersion(pips[name]) >= StrictVersion(match.group(3)):
-                    print(f"[ComfyUI-Manager] skip black listed pip installation: '{name}'")
-                    return True
+        if match is None or match.group(2) in ['<=', '==', '<']:
+            print(f"[ComfyUI-Manager] skip black listed pip installation: '{name}'")
+            return True
 
     return name.lower() in get_installed_packages()
 
 
 if os.path.exists(restore_snapshot_path):
     try:
+        import json
+
         cloned_repos = []
 
         def msg_capture(stream, prefix):
@@ -459,39 +382,39 @@ if os.path.exists(restore_snapshot_path):
         cmd_str = [sys.executable, git_script_path, '--apply-snapshot', restore_snapshot_path]
         exit_code = process_wrap(cmd_str, custom_nodes_path, handler=msg_capture)
 
-        repository_name = ''
-        for url in cloned_repos:
-            try:
-                repository_name = url.split("/")[-1].strip()
-                repo_path = os.path.join(custom_nodes_path, repository_name)
-                repo_path = os.path.abspath(repo_path)
+        with open(restore_snapshot_path, 'r', encoding="UTF-8", errors="ignore") as json_file:
+            info = json.load(json_file)
+            for url in cloned_repos:
+                try:
+                    repository_name = url.split("/")[-1].strip()
+                    repo_path = os.path.join(custom_nodes_path, repository_name)
+                    repo_path = os.path.abspath(repo_path)
 
-                requirements_path = os.path.join(repo_path, 'requirements.txt')
-                install_script_path = os.path.join(repo_path, 'install.py')
+                    requirements_path = os.path.join(repo_path, 'requirements.txt')
+                    install_script_path = os.path.join(repo_path, 'install.py')
 
-                this_exit_code = 0
+                    this_exit_code = 0
 
-                if os.path.exists(requirements_path):
-                    with open(requirements_path, 'r', encoding="UTF-8", errors="ignore") as file:
-                        for line in file:
-                            package_name = remap_pip_package(line.strip())
-                            if package_name and not is_installed(package_name):
-                                if not package_name.startswith('#'):
+                    if os.path.exists(requirements_path):
+                        with open(requirements_path, 'r', encoding="UTF-8", errors="ignore") as file:
+                            for line in file:
+                                package_name = line.strip()
+                                if package_name and not is_installed(package_name):
                                     install_cmd = [sys.executable, "-m", "pip", "install", package_name]
                                     this_exit_code += process_wrap(install_cmd, repo_path)
 
-                if os.path.exists(install_script_path) and f'{repo_path}/install.py' not in processed_install:
-                    processed_install.add(f'{repo_path}/install.py')
-                    install_cmd = [sys.executable, install_script_path]
-                    print(f">>> {install_cmd} / {repo_path}")
-                    this_exit_code += process_wrap(install_cmd, repo_path)
+                    if os.path.exists(install_script_path) and f'{repo_path}/install.py' not in processed_install:
+                        processed_install.add(f'{repo_path}/install.py')
+                        install_cmd = [sys.executable, install_script_path]
+                        print(f">>> {install_cmd} / {repo_path}")
+                        this_exit_code += process_wrap(install_cmd, repo_path)
 
-                if this_exit_code != 0:
+                    if this_exit_code != 0:
+                        print(f"[ComfyUI-Manager] Restoring '{repository_name}' is failed.")
+
+                except Exception as e:
+                    print(e)
                     print(f"[ComfyUI-Manager] Restoring '{repository_name}' is failed.")
-
-            except Exception as e:
-                print(e)
-                print(f"[ComfyUI-Manager] Restoring '{repository_name}' is failed.")
 
         if exit_code != 0:
             print(f"[ComfyUI-Manager] Restore snapshot failed.")
@@ -515,7 +438,7 @@ def execute_lazy_install_script(repo_path, executable):
         print(f"Install: pip packages for '{repo_path}'")
         with open(requirements_path, "r") as requirements_file:
             for line in requirements_file:
-                package_name = remap_pip_package(line.strip())
+                package_name = line.strip()
                 if package_name and not is_installed(package_name):
                     install_cmd = [executable, "-m", "pip", "install", package_name]
                     process_wrap(install_cmd, repo_path)
@@ -576,7 +499,7 @@ if os.path.exists(script_list_path):
     print("#######################################################################\n")
 
 del processed_install
-del pip_map
+del pip_list
 
 
 def check_windows_event_loop_policy():

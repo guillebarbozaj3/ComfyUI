@@ -109,9 +109,6 @@ export class CustomNodesInstaller extends ComfyDialog {
 		this.manager_dialog = manager_dialog;
 		this.search_keyword = '';
 		this.element = $el("div.comfy-modal", { parent: document.body }, []);
-
-		this.currentSortProperty = ''; // The property currently being sorted
-		this.currentSortAscending = true; // The direction of the current sort		
 	}
 
 	startInstall(target) {
@@ -370,181 +367,76 @@ export class CustomNodesInstaller extends ComfyDialog {
 		}
 	}
 
-	sortData(property, ascending = true) {
-		this.data.sort((a, b) => {
-			// Check if either value is -1 and handle accordingly
-			if (a[property] === -1) return 1; // Always put a at the end if its value is -1
-			if (b[property] === -1) return -1; // Always put b at the end if its value is -1
-			// And be careful here, (-1<'2024-01-01') and (-1>'2024-01-01') are both false! So I handle -1 seperately.
-			if (a[property] < b[property]) return ascending ? -1 : 1;
-			if (a[property] > b[property]) return ascending ? 1 : -1;
-			return 0;
-		});
-	}
-
-	resetHeaderStyles() {
-		const headers = ['th_author', 'th_title', 'th_stars', 'th_last_update']; // Add the IDs of all your sortable headers here
-		headers.forEach(headerId => {
-			const header = this.element.querySelector(`#${headerId}`);
-			if (header) {
-				header.style.backgroundColor = ''; // Reset to default background color
-				// Add other style resets if necessary
-			}
-		});
-	}
-	
-	toggleSort(property) {
-		// If currently sorted by this property, toggle the direction; else, sort ascending
-		if (this.currentSortProperty === property) {
-			this.currentSortAscending = !this.currentSortAscending;
-		} else {
-			this.currentSortAscending = false;
-		}
-		this.currentSortProperty = property;
-	
-		this.resetHeaderStyles(); // Reset styles of all sortable headers
-
-		// Determine the ID of the header based on the property
-		let headerId = '';
-		if (property === 'stars') {
-			headerId = 'th_stars';
-		} else if (property === 'last_update') {
-			headerId = 'th_last_update';
-		} else if (property === 'author') {
-			headerId = 'th_author';
-		} else if (property === 'title') {
-			headerId = 'th_title';
-		}
-
-		// If we have a valid headerId, change its style to indicate it's the active sort column
-		if (headerId) {
-			const activeHeader = this.element.querySelector(`#${headerId}`);
-			if (activeHeader) {
-				activeHeader.style.backgroundColor = '#222';
-				// Slightly brighter. Add other style changes if necessary.
-			}
-		}
-		
-		// Call sortData with the current property and direction
-		this.sortData(property, this.currentSortAscending);
-	
-		// Refresh the grid to display sorted data
-		this.createGrid();
-		this.apply_searchbox(this.data);
-	}
-
 	async createGrid() {
-		// Remove existing table if present
-		var grid = this.element.querySelector('#custom-nodes-grid');
-		var panel;
+		var grid = document.createElement('table');
+		grid.setAttribute('id', 'custom-nodes-grid');
+
+		this.grid_rows = {};
+
 		let self = this;
-		if (grid) {
-			grid.querySelector('tbody').remove();
-			panel = grid.parentNode;
-		} else {
-			grid = document.createElement('table');
-			grid.setAttribute('id', 'custom-nodes-grid');
 
-			this.grid_rows = {};
-
-			var thead = document.createElement('thead');
-
-			var headerRow = document.createElement('tr');
-			thead.style.position = "sticky";
-			thead.style.top = "0px";
-			thead.style.borderCollapse = "collapse";
-			thead.style.tableLayout = "fixed";
-
-			var header0 = document.createElement('th');
-			header0.style.width = "20px";
-			this.checkbox_all = $el("input",{type:'checkbox', id:'check_all'},[]);
-			header0.appendChild(this.checkbox_all);
-			this.checkbox_all.checked = false;
-			this.checkbox_all.disabled = true;
-			this.checkbox_all.addEventListener('change', function() { self.check_all.call(self, self.checkbox_all.checked); });
-
-			var header1 = document.createElement('th');
-			header1.innerHTML = '&nbsp;&nbsp;ID&nbsp;&nbsp;';
-			header1.style.width = "20px";
-
-			var header2 = document.createElement('th');
-			header2.innerHTML = 'Author';
-			header2.style.width = "150px";
-			header2.style.cursor = 'pointer';
-			header2.setAttribute('id', 'th_author');
-			header2.onclick = () => this.toggleSort('author');
-
-			var header3 = document.createElement('th');
-			header3.innerHTML = 'Name';
-			header3.style.width = "20%";
-			header3.style.cursor = 'pointer';
-			header3.setAttribute('id', 'th_title');
-			header3.onclick = () => this.toggleSort('title');
-
-			var header4 = document.createElement('th');
-			header4.innerHTML = 'Description';
-			header4.style.width = "60%";
-	//		header4.classList.add('expandable-column');
-
-			var header5 = document.createElement('th');
-			header5.innerHTML = '&nbsp;&nbsp;&nbsp;★&nbsp;&nbsp;&nbsp;';
-			header5.style.width = "130px";
-			header5.setAttribute('id', 'th_stars');
-			header5.style.cursor = 'pointer';
-			header5.onclick = () => this.toggleSort('stars');
-
-			var header6 = document.createElement('th');
-			header6.innerHTML = 'Last Update';
-			header6.style.width = "130px";
-			header6.setAttribute('id', 'th_last_update');
-			header6.style.cursor = 'pointer';
-			header6.onclick = () => this.toggleSort('last_update');
-
-			var header7 = document.createElement('th');
-			header7.innerHTML = 'Install';
-			header7.style.width = "130px";
-
-			header0.style.position = "sticky";
-			header0.style.top = "0px";
-			header1.style.position = "sticky";
-			header1.style.top = "0px";
-			header2.style.position = "sticky";
-			header2.style.top = "0px";
-			header3.style.position = "sticky";
-			header3.style.top = "0px";
-			header4.style.position = "sticky";
-			header4.style.top = "0px";
-			header5.style.position = "sticky";
-			header5.style.top = "0px";
-			header6.style.position = "sticky";
-			header6.style.top = "0px";
-			header7.style.position = "sticky";
-			header7.style.top = "0px";
-
-			thead.appendChild(headerRow);
-			headerRow.appendChild(header0);
-			headerRow.appendChild(header1);
-			headerRow.appendChild(header2);
-			headerRow.appendChild(header3);
-			headerRow.appendChild(header4);
-			headerRow.appendChild(header5);
-			headerRow.appendChild(header6);
-			headerRow.appendChild(header7);
-
-			headerRow.style.backgroundColor = "Black";
-			headerRow.style.color = "White";
-			headerRow.style.textAlign = "center";
-			headerRow.style.width = "100%";
-			headerRow.style.padding = "0";
-
-			grid.appendChild(thead);
-
-			panel = document.createElement('div');
-			panel.style.width = "100%";
-			panel.appendChild(grid);
-			this.element.appendChild(panel);
-		}
+		var thead = document.createElement('thead');
 		var tbody = document.createElement('tbody');
+
+		var headerRow = document.createElement('tr');
+		thead.style.position = "sticky";
+		thead.style.top = "0px";
+		thead.style.borderCollapse = "collapse";
+		thead.style.tableLayout = "fixed";
+
+		var header0 = document.createElement('th');
+		header0.style.width = "20px";
+		this.checkbox_all = $el("input",{type:'checkbox', id:'check_all'},[]);
+		header0.appendChild(this.checkbox_all);
+		this.checkbox_all.checked = false;
+		this.checkbox_all.disabled = true;
+		this.checkbox_all.addEventListener('change', function() { self.check_all.call(self, self.checkbox_all.checked); });
+
+		var header1 = document.createElement('th');
+		header1.innerHTML = '&nbsp;&nbsp;ID&nbsp;&nbsp;';
+		header1.style.width = "20px";
+		var header2 = document.createElement('th');
+		header2.innerHTML = 'Author';
+		header2.style.width = "150px";
+		var header3 = document.createElement('th');
+		header3.innerHTML = 'Name';
+		header3.style.width = "20%";
+		var header4 = document.createElement('th');
+		header4.innerHTML = 'Description';
+		header4.style.width = "60%";
+//		header4.classList.add('expandable-column');
+		var header5 = document.createElement('th');
+		header5.innerHTML = 'Install';
+		header5.style.width = "130px";
+
+		header0.style.position = "sticky";
+		header0.style.top = "0px";
+		header1.style.position = "sticky";
+		header1.style.top = "0px";
+		header2.style.position = "sticky";
+		header2.style.top = "0px";
+		header3.style.position = "sticky";
+		header3.style.top = "0px";
+		header4.style.position = "sticky";
+		header4.style.top = "0px";
+		header5.style.position = "sticky";
+		header5.style.top = "0px";
+
+		thead.appendChild(headerRow);
+		headerRow.appendChild(header0);
+		headerRow.appendChild(header1);
+		headerRow.appendChild(header2);
+		headerRow.appendChild(header3);
+		headerRow.appendChild(header4);
+		headerRow.appendChild(header5);
+
+		headerRow.style.backgroundColor = "Black";
+		headerRow.style.color = "White";
+		headerRow.style.textAlign = "center";
+		headerRow.style.width = "100%";
+		headerRow.style.padding = "0";
+
+		grid.appendChild(thead);
 		grid.appendChild(tbody);
 
 		if(this.data)
@@ -607,36 +499,7 @@ export class CustomNodesInstaller extends ComfyDialog {
 				}
 
 				var data5 = document.createElement('td');
-				data5.style.maxWidth = "100px";
-				data5.className = "cm-node-stars"
-				if(data.stars < 0) {
-					data5.textContent = 'N/A';
-				}
-				else {
-					data5.textContent = `${data.stars}`;
-				}
-				data5.style.whiteSpace = "nowrap";
-				data5.style.overflow = "hidden";
-				data5.style.textOverflow = "ellipsis";
 				data5.style.textAlign = "center";
-
-				var lastUpdateDate = new Date();
-				var data6 = document.createElement('td');
-				data6.style.maxWidth = "100px";
-				data6.className = "cm-node-last-update";
-				if(data.last_update < 0) {
-					data6.textContent = 'N/A';
-				}
-				else {
-					data6.textContent = `${data.last_update}`.split(' ')[0];
-				}
-				data6.style.whiteSpace = "nowrap";
-				data6.style.overflow = "hidden";
-				data6.style.textOverflow = "ellipsis";
-				data6.style.textAlign = "center";
-
-				var data7 = document.createElement('td');
-				data7.style.textAlign = "center";
 
 				var installBtn = document.createElement('button');
 				installBtn.className = "cm-btn-install";
@@ -711,7 +574,6 @@ export class CustomNodesInstaller extends ComfyDialog {
 					installBtn.style.backgroundColor = 'black';
 					installBtn.style.color = 'white';
 					break;
-
 				default:
 					installBtn.innerHTML = `Try Install`;
 					installBtn.style.backgroundColor = 'Gray';
@@ -725,7 +587,7 @@ export class CustomNodesInstaller extends ComfyDialog {
 						install_checked_custom_node(self.grid_rows, j, CustomNodesInstaller.instance, 'update');
 					});
 
-					data7.appendChild(installBtn2);
+					data5.appendChild(installBtn2);
 				}
 
 				if(installBtn3 != null) {
@@ -734,7 +596,7 @@ export class CustomNodesInstaller extends ComfyDialog {
 						install_checked_custom_node(self.grid_rows, j, CustomNodesInstaller.instance, 'toggle_active');
 					});
 
-					data7.appendChild(installBtn3);
+					data5.appendChild(installBtn3);
 				}
 
 				if(installBtn4 != null) {
@@ -743,7 +605,7 @@ export class CustomNodesInstaller extends ComfyDialog {
 						install_checked_custom_node(self.grid_rows, j, CustomNodesInstaller.instance, 'fix');
 					});
 
-					data7.appendChild(installBtn4);
+					data5.appendChild(installBtn4);
 				}
 
 				installBtn.style.width = "120px";
@@ -759,7 +621,7 @@ export class CustomNodesInstaller extends ComfyDialog {
 				});
 
 				if(!data.author.startsWith('#NOTICE')){
-					data7.appendChild(installBtn);
+					data5.appendChild(installBtn);
 				}
 
 				if(data.installed == 'Fail' || data.author.startsWith('#NOTICE'))
@@ -775,8 +637,6 @@ export class CustomNodesInstaller extends ComfyDialog {
 				dataRow.appendChild(data3);
 				dataRow.appendChild(data4);
 				dataRow.appendChild(data5);
-				dataRow.appendChild(data6);
-				dataRow.appendChild(data7);
 				tbody.appendChild(dataRow);
 
 				let buttons = [];
@@ -793,6 +653,10 @@ export class CustomNodesInstaller extends ComfyDialog {
 				this.grid_rows[i] = {data:data, buttons:buttons, checkbox:checkbox, control:dataRow};
 			}
 
+		const panel = document.createElement('div');
+		panel.style.width = "100%";
+		panel.appendChild(grid);
+
 		function handleResize() {
 		  const parentHeight = self.element.clientHeight;
 		  const gridHeight = parentHeight - 200;
@@ -808,6 +672,7 @@ export class CustomNodesInstaller extends ComfyDialog {
 		grid.style.overflowY = "scroll";
 		this.element.style.height = "85%";
 		this.element.style.width = "80%";
+		this.element.appendChild(panel);
 
 		handleResize();
 	}

@@ -5,14 +5,10 @@ import json
 from git import Repo
 from torchvision.datasets.utils import download_url
 import concurrent
-import datetime
 
 builtin_nodes = set()
 
 import sys
-
-from urllib.parse import urlparse
-from github import Github
 
 
 # prepare temp dir
@@ -24,49 +20,26 @@ else:
 if not os.path.exists(temp_dir):
     os.makedirs(temp_dir)
 
-
-skip_update = '--skip-update' in sys.argv or '--skip-all' in sys.argv
-skip_stat_update = '--skip-stat-update' in sys.argv or '--skip-all' in sys.argv
-
-if not skip_stat_update:
-    g = Github(os.environ.get('GITHUB_TOKEN'))
-else:
-    g = None
-
+skip_update = '--skip-update' in sys.argv
 
 print(f"TEMP DIR: {temp_dir}")
 
 
-parse_cnt = 0
-
-
 def extract_nodes(code_text):
-    global parse_cnt
-
     try:
-        if parse_cnt % 100 == 0:
-            print(f".", end="", flush=True)
-        parse_cnt += 1
-
-        code_text = re.sub(r'\\[^"\']', '', code_text)
         parsed_code = ast.parse(code_text)
 
         assignments = (node for node in parsed_code.body if isinstance(node, ast.Assign))
-        
+
         for assignment in assignments:
-            if isinstance(assignment.targets[0], ast.Name) and assignment.targets[0].id in ['NODE_CONFIG', 'NODE_CLASS_MAPPINGS']:
+            if isinstance(assignment.targets[0], ast.Name) and assignment.targets[0].id == 'NODE_CLASS_MAPPINGS':
                 node_class_mappings = assignment.value
                 break
         else:
             node_class_mappings = None
 
         if node_class_mappings:
-            s = set()
-
-            for key in node_class_mappings.keys:
-                    if key is not None and isinstance(key.value, str):
-                        s.add(key.value.strip())
-                    
+            s = set([key.s.strip() for key in node_class_mappings.keys if key is not None])
             return s
         else:
             return set()
@@ -92,26 +65,16 @@ def scan_in_file(filename, is_builtin=False):
     class_dict = {}
 
     nodes |= extract_nodes(code)
-    code = re.sub(r'^#.*?$', '', code, flags=re.MULTILINE)
 
-    def extract_keys(pattern, code):
-        keys = re.findall(pattern, code)
-        return {key.strip() for key in keys}
+    pattern2 = r'^[^=]*_CLASS_MAPPINGS\["(.*?)"\]'
+    keys = re.findall(pattern2, code)
+    for key in keys:
+        nodes.add(key.strip())
 
-    def update_nodes(nodes, new_keys):
-        nodes |= new_keys
-
-    patterns = [
-        r'^[^=]*_CLASS_MAPPINGS\["(.*?)"\]',
-        r'^[^=]*_CLASS_MAPPINGS\[\'(.*?)\'\]',
-        r'@register_node\("(.+)",\s*\".+"\)',
-        r'"(\w+)"\s*:\s*{"class":\s*\w+\s*'
-    ]
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = {executor.submit(extract_keys, pattern, code): pattern for pattern in patterns}
-        for future in concurrent.futures.as_completed(futures):
-            update_nodes(nodes, future.result())
+    pattern3 = r'^[^=]*_CLASS_MAPPINGS\[\'(.*?)\'\]'
+    keys = re.findall(pattern3, code)
+    for key in keys:
+        nodes.add(key.strip())
 
     matches = regex.findall(code)
     for match in matches:
@@ -228,7 +191,7 @@ def clone_or_pull_git_repository(git_url):
         try:
             repo = Repo(repo_dir)
             origin = repo.remote(name="origin")
-            origin.pull()
+            origin.pull(rebase=True)
             repo.git.submodule('update', '--init', '--recursive')
             print(f"Pulling {repo_name}...")
         except Exception as e:
@@ -250,6 +213,9 @@ def update_custom_nodes():
     git_url_titles_preemptions = get_git_urls_from_json('custom-node-list.json')
 
     def process_git_url_title(url, title, preemptions, node_pattern):
+        if 'Jovimetrix' in title:
+            pass
+
         name = os.path.basename(url)
         if name.endswith(".git"):
             name = name[:-4]
@@ -258,104 +224,7 @@ def update_custom_nodes():
         if not skip_update:
             clone_or_pull_git_repository(url)
 
-    def process_git_stats(git_url_titles_preemptions):
-        GITHUB_STATS_CACHE_FILENAME = 'github-stats-cache.json'
-        GITHUB_STATS_FILENAME = 'github-stats.json'
-
-        github_stats = {}
-        try:
-            with open(GITHUB_STATS_CACHE_FILENAME, 'r', encoding='utf-8') as file:
-                github_stats = json.load(file)
-        except FileNotFoundError:
-            pass
-
-        def is_rate_limit_exceeded():
-            return g.rate_limiting[0] == 0
-
-        if is_rate_limit_exceeded():
-            print(f"GitHub API Rate Limit Exceeded: remained - {(g.rate_limiting_resettime - datetime.datetime.now().timestamp())/60:.2f} min")
-        else:
-            def renew_stat(url):
-                if is_rate_limit_exceeded():
-                    return
-
-                if 'github.com' not in url:
-                    return None
-
-                print('.', end="")
-                sys.stdout.flush()
-                try:
-                    # Parsing the URL
-                    parsed_url = urlparse(url)
-                    domain = parsed_url.netloc
-                    path = parsed_url.path
-                    path_parts = path.strip("/").split("/")
-                    if len(path_parts) >= 2 and domain == "github.com":
-                        owner_repo = "/".join(path_parts[-2:])
-                        repo = g.get_repo(owner_repo)
-
-                        last_update = repo.pushed_at.strftime("%Y-%m-%d %H:%M:%S") if repo.pushed_at else 'N/A'
-                        item = {
-                            "stars": repo.stargazers_count,
-                            "last_update": last_update,
-                            "cached_time": datetime.datetime.now().timestamp(),
-                        }
-                        return url, item
-                    else:
-                        print(f"\nInvalid URL format for GitHub repository: {url}\n")
-                except Exception as e:
-                    print(f"\nERROR on {url}\n{e}")
-
-                return None
-
-            # resolve unresolved urls
-            with concurrent.futures.ThreadPoolExecutor(11) as executor:
-                futures = []
-                for url, title, preemptions, node_pattern in git_url_titles_preemptions:
-                    if url not in github_stats:
-                        futures.append(executor.submit(renew_stat, url))
-
-                for future in concurrent.futures.as_completed(futures):
-                    url_item = future.result()
-                    if url_item is not None:
-                        url, item = url_item
-                        github_stats[url] = item
-
-            # renew outdated cache
-            outdated_urls = []
-            for k, v in github_stats.items():
-                elapsed = (datetime.datetime.now().timestamp() - v['cached_time'])
-                if elapsed > 60*60*12:  # 12 hours
-                    outdated_urls.append(k)
-
-            with concurrent.futures.ThreadPoolExecutor(11) as executor:
-                for url in outdated_urls:
-                    futures.append(executor.submit(renew_stat, url))
-
-                for future in concurrent.futures.as_completed(futures):
-                    url_item = future.result()
-                    if url_item is not None:
-                        url, item = url_item
-                        github_stats[url] = item
-                        
-            with open('github-stats-cache.json', 'w', encoding='utf-8') as file:
-                json.dump(github_stats, file, ensure_ascii=False, indent=4)
-
-        with open(GITHUB_STATS_FILENAME, 'w', encoding='utf-8') as file:
-            for v in github_stats.values():
-                if "cached_time" in v:
-                    del v["cached_time"]
-
-            github_stats = dict(sorted(github_stats.items()))
-
-            json.dump(github_stats, file, ensure_ascii=False, indent=4)
-
-        print(f"Successfully written to {GITHUB_STATS_FILENAME}.")
-
-    if not skip_stat_update:
-        process_git_stats(git_url_titles_preemptions)
-
-    with concurrent.futures.ThreadPoolExecutor(11) as executor:
+    with concurrent.futures.ThreadPoolExecutor(10) as executor:
         for url, title, preemptions, node_pattern in git_url_titles_preemptions:
             executor.submit(process_git_url_title, url, title, preemptions, node_pattern)
 
@@ -490,4 +359,3 @@ updated_node_info = update_custom_nodes()
 print("\n# 'extension-node-map.json' file is generated.\n")
 gen_json(updated_node_info)
 
-print("\nDONE.\n")

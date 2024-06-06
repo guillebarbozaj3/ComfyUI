@@ -41,18 +41,9 @@ async function tryInstallCustomNode(event) {
 										headers: { 'Content-Type': 'application/json' },
 										body: JSON.stringify(event.detail.target)
 									});
-
-			if(response.status == 403) {
-				show_message('This action is not allowed with this security level configuration.');
-				return false;
-			}
 		}
 
-		let response = await api.fetchApi("/manager/reboot");
-		if(response.status == 403) {
-			show_message('This action is not allowed with this security level configuration.');
-			return false;
-		}
+		api.fetchApi("/manager/reboot");
 
 		await sleep(300);
 
